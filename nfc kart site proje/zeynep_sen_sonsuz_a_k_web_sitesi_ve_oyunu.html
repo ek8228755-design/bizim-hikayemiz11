@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Zeynep & Sen | Sonsuz Aşk</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Canvas Confetti Library for unlock animation -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <style>
+        :root {
+            --primary-pink: #ff4d6d;
+            --deep-red: #c9184a;
+            --soft-pink: #fff0f3;
+            --gold-accent: #ffb703;
+            --card-bg: rgba(255, 255, 255, 0.93);
+            --shadow-pink: rgba(255, 77, 109, 0.25);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #feada6 100%);
+            font-family: 'Poppins', sans-serif;
+            color: #4a4a4a;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .floating-hearts-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .heart-particle {
+            position: absolute;
+            color: rgba(255, 77, 109, 0.5);
+            font-size: 1.4rem;
+            animation: floatUp 6s linear infinite;
+            filter: drop-shadow(0 2px 4px rgba(255,255,255,0.8));
+        }
+
+        @keyframes floatUp {
+            0% {
+                transform: translateY(105vh) scale(0.5) rotate(0deg);
+                opacity: 0;
+            }
+            20% {
+                opacity: 0.8;
+            }
+            100% {
+                transform: translateY(-10vh) scale(1.3) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .lock-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            transition: opacity 0.8s ease, visibility 0.8s ease;
+        }
+
+        .lock-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            border-radius: 30px;
+            padding: 35px 25px;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 25px 50px rgba(201, 24, 74, 0.3);
+            border: 3px solid #ffccd5;
+            animation: bounceIn 1s ease;
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            70% { transform: scale(1.03); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .lock-icon {
+            font-size: 3.5rem;
+            margin-bottom: 10px;
+            display: inline-block;
+            animation: pulseHeart 1.5s infinite;
+        }
+
+        @keyframes pulseHeart {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+            100% { transform: scale(1); }
+        }
+
+        .lock-title {
+            font-family: 'Dancing Script', cursive;
+            font-size: 2.6rem;
+            color: var(--deep-red);
+            margin-bottom: 8px;
+        }
+
+        .lock-hint {
+            font-size: 0.88rem;
+            color: #666;
+            margin-bottom: 22px;
+            line-height: 1.4;
+            background: #fff0f3;
+            padding: 10px;
+            border-radius: 12px;
+            border: 1px dashed var(--primary-pink);
+        }
+
+        .pass-input {
+            width: 100%;
+            padding: 14px 18px;
+            border-radius: 20px;
+            border: 2px solid #ffb3c1;
+            font-size: 1.1rem;
+            text-align: center;
+            outline: none;
+            transition: all 0.3s;
+            margin-bottom: 15px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            color: var(--deep-red);
+        }
+
+        .pass-input:focus {
+            border-color: var(--primary-pink);
+            box-shadow: 0 0 12px rgba(255, 77, 109, 0.4);
+        }
+
+        .unlock-btn {
+            width: 100%;
+            background: linear-gradient(135deg, var(--primary-pink), var(--deep-red));
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 20px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 8px 20px var(--shadow-pink);
+            transition: all 0.3s ease;
+        }
+
+        .unlock-btn:active {
+            transform: scale(0.97);
+        }
+
+        .error-msg {
+            color: #d90429;
+            font-size: 0.82rem;
+            margin-top: 10px;
+            display: none;
+            font-weight: 600;
+        }
+
+        .app-container {
+            position: relative;
+            z-index: 2;
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border-radius: 32px;
+            padding: 28px 22px;
+            max-width: 450px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 20px 45px rgba(230, 80, 115, 0.25);
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            display: none; /* Controlled by JS unlock */
+            animation: fadeIn 1s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .main-header h1 {
+            font-family: 'Dancing Script', cursive;
+            font-size: 2.8rem;
+            color: var(--deep-red);
+            margin-bottom: 2px;
+            text-shadow: 1px 1px 2px rgba(255, 182, 193, 0.5);
+        }
+
+        .main-header p {
+            font-size: 0.92rem;
+            color: #666;
+            margin-bottom: 18px;
+            font-weight: 300;
+        }
+
+        /* Floating Audio Control Widget */
+        .music-widget {
+            background: linear-gradient(135deg, #ff4d6d, #ff758c);
+            color: white;
+            border: none;
+            padding: 10px 22px;
+            border-radius: 25px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 22px;
+            box-shadow: 0 6px 18px rgba(255, 77, 109, 0.35);
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .music-widget:active {
+            transform: scale(0.95);
+        }
+
+        .counter-card {
+            background: #ffffff;
+            border-radius: 22px;
+            padding: 20px 14px;
+            margin-bottom: 24px;
+            box-shadow: 0 10px 25px rgba(255, 77, 109, 0.08);
+            border: 1px solid rgba(255, 182, 193, 0.5);
+        }
+
+        .counter-title {
+            font-size: 0.82rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--primary-pink);
+            font-weight: 700;
+            margin-bottom: 14px;
+        }
+
+        .timer-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+
+        .time-box {
+            background: #fff0f3;
+            padding: 12px 4px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 182, 193, 0.4);
+        }
+
+        .time-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--deep-red);
+            line-height: 1.1;
+        }
+
+        .time-label {
+            font-size: 0.68rem;
+            color: #888;
+            margin-top: 4px;
+            font-weight: 500;
+        }
+
+        /* Avatar Frame */
+        .couple-frame {
+            position: relative;
+            margin: 0 auto 22px auto;
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ff4d6d, #ffb703);
+            padding: 5px;
+            box-shadow: 0 12px 25px rgba(255, 77, 109, 0.35);
+        }
+
+        .couple-img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            background: #fff;
+            border: 3px solid #fff;
+        }
+
+        /* Digital Love Letter */
+        .letter-card {
+            font-size: 0.92rem;
+            line-height: 1.65;
+            color: #444;
+            background: #fff5f7;
+            padding: 20px;
+            border-radius: 20px;
+            border-left: 5px solid var(--primary-pink);
+            margin-bottom: 25px;
+            text-align: left;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+            position: relative;
+        }
+
+        .letter-card strong {
+            color: var(--deep-red);
+        }
+
+        .section-title {
+            font-size: 1.05rem;
+            color: var(--deep-red);
+            margin-bottom: 14px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .polaroid-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 14px;
+            margin-bottom: 25px;
+        }
+
+        .polaroid-item {
+            background: white;
+            padding: 8px 8px 18px 8px;
+            border-radius: 12px;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+            transform: rotate(-2deg);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 1px solid #ffe6ea;
+        }
+
+        .polaroid-item:nth-child(even) {
+            transform: rotate(2deg);
+        }
+
+        .polaroid-item:hover {
+            transform: scale(1.05) rotate(0deg);
+            z-index: 5;
+            box-shadow: 0 10px 25px rgba(255, 77, 109, 0.25);
+        }
+
+        .polaroid-img {
+            width: 100%;
+            height: 125px;
+            object-fit: cover;
+            border-radius: 8px;
+            background: #ffd6ff;
+        }
+
+        .polaroid-caption {
+            font-family: 'Dancing Script', cursive;
+            font-size: 1.1rem;
+            color: var(--deep-red);
+            margin-top: 8px;
+        }
+
+        .game-trigger-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #e63946, #ff4d6d);
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 22px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 10px 25px rgba(230, 57, 70, 0.4);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .game-trigger-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 28px rgba(230, 57, 70, 0.5);
+        }
+
+        /* Fullscreen Photo Lightbox */
+        .lightbox-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0,0,0,0.88);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .lightbox-img {
+            max-width: 90%;
+            max-height: 80vh;
+            border-radius: 16px;
+            border: 4px solid white;
+            box-shadow: 0 0 30px rgba(255,255,255,0.2);
+        }
+
+        /* Game Modal Window */
+        .game-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            padding: 12px;
+        }
+
+        .game-card {
+            background: #fff;
+            width: 100%;
+            max-width: 380px;
+            border-radius: 28px;
+            padding: 16px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+            position: relative;
+            text-align: center;
+            border: 3px solid #ff758c;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 12px;
+            right: 14px;
+            background: #ff4d6d;
+            color: white;
+            border: none;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .game-banner-text {
+            font-family: 'Dancing Script', cursive;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #e63946;
+            margin-bottom: 10px;
+            text-shadow: 1px 1px 0px #ffccd5;
+        }
+
+        #gameCanvas {
+            width: 100%;
+            height: 380px;
+            background: linear-gradient(to bottom, #a1c4fd 0%, #c2e9fb 100%);
+            border-radius: 20px;
+            display: block;
+            border: 2px solid #ffb703;
+            touch-action: none;
+        }
+
+        .game-instruction {
+            font-size: 0.78rem;
+            color: #777;
+            margin-top: 10px;
+            font-weight: 500;
+        }
+
+        footer {
+            margin-top: 25px;
+            font-size: 0.78rem;
+            color: #aaa;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="floating-hearts-bg" id="heartContainer"></div>
+
+    <audio id="bgMusic" loop preload="auto">
+        <source src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=romantic-piano-112199.mp3" type="audio/mpeg">
+    </audio>
+
+    <div class="lock-screen" id="lockScreen">
+        <div class="lock-card">
+            <div class="lock-icon">💖</div>
+            <div class="lock-title">Zeynep'e Özel</div>
+            <div class="lock-hint">
+                🔒 <strong>Giriş Şifresi:</strong><br>
+                Aşkımızın başladığı özel tarih?<br>
+                <em>(Örn: 11.04.2025 veya 11)</em>
+            </div>
+            <input type="text" id="passInput" class="pass-input" placeholder="Şifrenizi Girin..." autocomplete="off">
+            <button class="unlock-btn" onclick="checkPassword()">Aşkın Kilidini Aç ✨</button>
+            <div class="error-msg" id="errorMsg">Yanlış şifre birtanem, tekrar dene! ❤️</div>
+        </div>
+    </div>
+
+    <div class="app-container" id="appContainer">
+        
+        <div class="main-header">
+            <h1>Sevgili Zeynep <span style="color:var(--primary-pink); display:inline-block; animation: pulseHeart 1.2s infinite;">♥</span></h1>
+            <p>İyi ki Hayatımdasın, İyi ki Benimsin...</p>
+        </div>
+
+        <button class="music-widget" onclick="toggleMusic()">
+            <span id="musicIcon">🎵</span> <span id="musicText">Müziği Başlat</span>
+        </button>
+
+        <!-- Counter -->
+        <div class="counter-card">
+            <div class="counter-title">11 Nisan 2025'ten Bu Yana Kalbim Seninle...</div>
+            <div class="timer-grid">
+                <div class="time-box">
+                    <div class="time-number" id="days">0</div>
+                    <div class="time-label">GÜN</div>
+                </div>
+                <div class="time-box">
+                    <div class="time-number" id="hours">0</div>
+                    <div class="time-label">SAAT</div>
+                </div>
+                <div class="time-box">
+                    <div class="time-number" id="minutes">0</div>
+                    <div class="time-label">DAKİKA</div>
+                </div>
+                <div class="time-box">
+                    <div class="time-number" id="seconds">0</div>
+                    <div class="time-label">SANİYE</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Couple Avatar Frame -->
+        <div class="couple-frame">
+            <img src="foto1.jpg" onerror="this.src='https://placehold.co/300x300/ff4d6d/ffffff?text=Zeynep+%26+Sen'" alt="Zeynep ve Sen" class="couple-img">
+        </div>
+
+        <!-- Digital Love Letter -->
+        <div class="letter-card">
+            <strong>Canım Zeynep'im,</strong><br>
+            11 Nisan 2025 günü hayatıma girdiğin andan itibaren her şey bambaşka bir anlam kazandı. Birlikte güldüğümüz her an, paylaştığımız her tebessüm benim en değerli hazinem oldu. Geçen her saat, her dakika seni daha çok sevmeme vesile oluyor. İyi ki varsın!
+        </div>
+
+        <!-- Polaroid Photo Gallery -->
+        <div class="section-title">En Güzel Anlarımız 📸</div>
+        <div class="polaroid-grid">
+            <div class="polaroid-item" onclick="openLightbox('foto1.jpg', 'https://placehold.co/600x800/ff758c/ffffff?text=Unutulmaz+An+1')">
+                <img src="foto1.jpg" onerror="this.src='https://placehold.co/300x300/ff758c/ffffff?text=An%C4%B1+1'" class="polaroid-img" alt="Anı 1">
+                <div class="polaroid-caption">İlk Gülüşün... 💕</div>
+            </div>
+            <div class="polaroid-item" onclick="openLightbox('foto2.jpg', 'https://placehold.co/600x800/ff4d6d/ffffff?text=Unutulmaz+An+2')">
+                <img src="foto2.jpg" onerror="this.src='https://placehold.co/300x300/ff4d6d/ffffff?text=An%C4%B1+2'" class="polaroid-img" alt="Anı 2">
+                <div class="polaroid-caption">En Tatlı Bakışın 💖</div>
+            </div>
+            <div class="polaroid-item" onclick="openLightbox('foto3.jpg', 'https://placehold.co/600x800/ffb703/ffffff?text=Unutulmaz+An+3')">
+                <img src="foto3.jpg" onerror="this.src='https://placehold.co/300x300/ffb703/ffffff?text=An%C4%B1+3'" class="polaroid-img" alt="Anı 3">
+                <div class="polaroid-caption">Birlikte Çok Güzeliz 🌸</div>
+            </div>
+            <div class="polaroid-item" onclick="openLightbox('foto4.jpg', 'https://placehold.co/600x800/c9184a/ffffff?text=Unutulmaz+An+4')">
+                <img src="foto4.jpg" onerror="this.src='https://placehold.co/300x300/c9184a/ffffff?text=An%C4%B1+4'" class="polaroid-img" alt="Anı 4">
+                <div class="polaroid-caption">Sonsuza Kadar... ♥</div>
+            </div>
+        </div>
+
+        <!-- Flappy Heart Game Trigger -->
+        <button class="game-trigger-btn" onclick="openGameModal()">
+            <span>🎮</span> Zeynep İçin Sürpriz Oyunu Başlat! <span>💖</span>
+        </button>
+
+        <footer>Sonsuza Kadar Beraber... ♥</footer>
+    </div>
+
+    <!-- Lightbox Modal -->
+    <div class="lightbox-modal" id="lightboxModal" onclick="closeLightbox()">
+        <img src="" id="lightboxImg" class="lightbox-img" alt="Büyütülmüş Fotoğraf">
+    </div>
+
+    <!-- Game Modal -->
+    <div class="game-modal" id="gameModal">
+        <div class="game-card">
+            <button class="close-btn" onclick="closeGameModal()">✕</button>
+            <div class="game-banner-text">ZEYNEP SENİ ÇOK SEVİYORUM!</div>
+            <canvas id="gameCanvas" width="320" height="380"></canvas>
+            <div class="game-instruction">Ekrana dokunarak veya boşluk tuşuna basarak kalbi uçur!</div>
+        </div>
+    </div>
+
+    <script>
+        /* Floating background heart generator */
+        function createFloatingHeart() {
+            const container = document.getElementById('heartContainer');
+            const heart = document.createElement('div');
+            heart.classList.add('heart-particle');
+            const hearts = ['❤️', '💖', '💕', '💗', '💓'];
+            heart.innerHTML = hearts[Math.floor(Math.random() * hearts.length)];
+            heart.style.left = Math.random() * 100 + 'vw';
+            heart.style.animationDuration = (Math.random() * 3 + 3.5) + 's';
+            container.appendChild(heart);
+
+            setTimeout(() => {
+                heart.remove();
+            }, 6500);
+        }
+        setInterval(createFloatingHeart, 400);
+
+        function checkPassword() {
+            const input = document.getElementById('passInput').value.trim().toLowerCase();
+            const errorMsg = document.getElementById('errorMsg');
+            
+            // Accepted variations for 11 April 2025
+            const validPasswords = ['11042025', '11.04.2025', '11/04/2025', '11 04 2025', '11'];
+
+            if (validPasswords.includes(input)) {
+                // Trigger Confetti
+                if (typeof confetti === 'function') {
+                    confetti({
+                        particleCount: 120,
+                        spread: 70,
+                        origin: { y: 0.6 }
+                    });
+                }
+
+                document.getElementById('lockScreen').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('lockScreen').style.display = 'none';
+                    document.getElementById('appContainer').style.display = 'block';
+                }, 700);
+            } else {
+                errorMsg.style.display = 'block';
+                const card = document.querySelector('.lock-card');
+                card.style.animation = 'none';
+                void card.offsetWidth; // trigger reflow
+                card.style.animation = 'shake 0.4s ease';
+            }
+        }
+
+        // Enter key listener for password
+        document.getElementById('passInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') checkPassword();
+        });
+
+        const startDate = new Date('2025-04-11T00:00:00');
+
+        function updateCounter() {
+            const now = new Date();
+            const diff = now - startDate;
+
+            if (diff > 0) {
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+                const minutes = Math.floor((diff / (1000 * 60)) % 60);
+                const seconds = Math.floor((diff / 1000) % 60);
+
+                document.getElementById('days').innerText = days;
+                document.getElementById('hours').innerText = hours;
+                document.getElementById('minutes').innerText = minutes;
+                document.getElementById('seconds').innerText = seconds;
+            } else {
+                document.getElementById('days').innerText = 0;
+                document.getElementById('hours').innerText = 0;
+                document.getElementById('minutes').innerText = 0;
+                document.getElementById('seconds').innerText = 0;
+            }
+        }
+        updateCounter();
+        setInterval(updateCounter, 1000);
+
+        const music = document.getElementById('bgMusic');
+        let isPlaying = false;
+
+        function toggleMusic() {
+            const musicText = document.getElementById('musicText');
+            const musicIcon = document.getElementById('musicIcon');
+            if (isPlaying) {
+                music.pause();
+                isPlaying = false;
+                musicText.innerText = 'Müziği Başlat';
+                musicIcon.innerText = '🎵';
+            } else {
+                music.play().then(() => {
+                    isPlaying = true;
+                    musicText.innerText = 'Müziği Durdur';
+                    musicIcon.innerText = '🎶';
+                }).catch(e => {
+                    console.log("Audio play deferred:", e);
+                });
+            }
+        }
+
+        /* Lightbox Image Popup */
+        function openLightbox(src, fallback) {
+            const modal = document.getElementById('lightboxModal');
+            const img = document.getElementById('lightboxImg');
+            img.src = src;
+            img.onerror = () => { img.src = fallback; };
+            modal.style.display = 'flex';
+        }
+
+        function closeLightbox() {
+            document.getElementById('lightboxModal').style.display = 'none';
+        }
+
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        let animationFrameId;
+        let gameState = 'START'; // 'START', 'PLAYING', 'GAMEOVER'
+
+        let bird = {
+            x: 50,
+            y: 180,
+            radius: 14,
+            velocity: 0,
+            gravity: 0.38,
+            jump: -6.5
+        };
+
+        let pipes = [];
+        let frameCount = 0;
+        let score = 0;
+        let highScore = 0;
+
+        const romanticQuotes = [
+            "ZEYNEP SENİ ÇOK SEVİYORUM!",
+            "İyi ki Varsın Birtanem!",
+            "Gülüşün Ömre Bedel!",
+            "Kalbimin Tek Sahibi!",
+            "Sonsuza Kadar Beraber!"
+        ];
+        let currentQuote = romanticQuotes[0];
+
+        function openGameModal() {
+            document.getElementById('gameModal').style.display = 'flex';
+            resetGame();
+        }
+
+        function closeGameModal() {
+            document.getElementById('gameModal').style.display = 'none';
+            cancelAnimationFrame(animationFrameId);
+            gameState = 'START';
+        }
+
+        function resetGame() {
+            bird.y = 180;
+            bird.velocity = 0;
+            pipes = [];
+            score = 0;
+            frameCount = 0;
+            currentQuote = romanticQuotes[0];
+            gameState = 'START';
+            draw();
+        }
+
+        function jump() {
+            if (gameState === 'START') {
+                gameState = 'PLAYING';
+                gameLoop();
+            } else if (gameState === 'PLAYING') {
+                bird.velocity = bird.jump;
+            } else if (gameState === 'GAMEOVER') {
+                resetGame();
+                gameState = 'PLAYING';
+                gameLoop();
+            }
+        }
+
+        canvas.addEventListener('pointerdown', function(e) {
+            e.preventDefault();
+            jump();
+        });
+
+        window.addEventListener('keydown', function(e) {
+            if (e.code === 'Space' && document.getElementById('gameModal').style.display === 'flex') {
+                e.preventDefault();
+                jump();
+            }
+        });
+
+        function drawBird() {
+            ctx.save();
+            ctx.translate(bird.x, bird.y);
+            
+            // Draw Cute Flying Heart
+            ctx.fillStyle = '#e63946';
+            ctx.beginPath();
+            ctx.arc(-6, -4, 8, 0, Math.PI, true);
+            ctx.arc(6, -4, 8, 0, Math.PI, true);
+            ctx.lineTo(0, 12);
+            ctx.closePath();
+            ctx.fill();
+
+            // Angel Wings
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.ellipse(-8, 0, 6, 3, Math.PI / 4, 0, 2 * Math.PI);
+            ctx.fill();
+
+            ctx.restore();
+        }
+
+        function createPipe() {
+            let gap = 115;
+            let minTop = 40;
+            let maxTop = canvas.height - gap - 60;
+            let topHeight = Math.floor(Math.random() * (maxTop - minTop + 1)) + minTop;
+
+            pipes.push({
+                x: canvas.width,
+                top: topHeight,
+                bottom: canvas.height - (topHeight + gap),
+                passed: false
+            });
+        }
+
+        function drawPipes() {
+            pipes.forEach(pipe => {
+                let gradTop = ctx.createLinearGradient(pipe.x, 0, pipe.x + 40, 0);
+                gradTop.addColorStop(0, '#ff758c');
+                gradTop.addColorStop(1, '#ff4d6d');
+                
+                // Top Pipe
+                ctx.fillStyle = gradTop;
+                ctx.fillRect(pipe.x, 0, 40, pipe.top);
+                ctx.strokeStyle = '#c9184a';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(pipe.x, 0, 40, pipe.top);
+
+                // Bottom Pipe
+                ctx.fillRect(pipe.x, canvas.height - pipe.bottom, 40, pipe.bottom);
+                ctx.strokeRect(pipe.x, canvas.height - pipe.bottom, 40, pipe.bottom);
+
+                // Pipe heart badges
+                ctx.fillStyle = '#fff';
+                ctx.font = '12px sans-serif';
+                ctx.fillText('♥', pipe.x + 14, pipe.top - 8);
+                ctx.fillText('♥', pipe.x + 14, canvas.height - pipe.bottom + 20);
+            });
+        }
+
+        function updatePipes() {
+            if (frameCount % 90 === 0) {
+                createPipe();
+            }
+
+            pipes.forEach((pipe) => {
+                pipe.x -= 2;
+
+                // Collision detection
+                if (
+                    bird.x + bird.radius > pipe.x &&
+                    bird.x - bird.radius < pipe.x + 40 &&
+                    (bird.y - bird.radius < pipe.top || bird.y + bird.radius > canvas.height - pipe.bottom)
+                ) {
+                    gameState = 'GAMEOVER';
+                }
+
+                // Score update
+                if (pipe.x + 40 < bird.x && !pipe.passed) {
+                    score++;
+                    if (score > highScore) highScore = score;
+                    pipe.passed = true;
+
+                    // Cycle love message
+                    currentQuote = romanticQuotes[score % romanticQuotes.length];
+                }
+            });
+
+            if (pipes.length > 0 && pipes[0].x < -40) {
+                pipes.shift();
+            }
+        }
+
+        function draw() {
+            // Background gradient
+            let bgGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            bgGrad.addColorStop(0, '#ffe6ea');
+            bgGrad.addColorStop(1, '#ffb3c1');
+            ctx.fillStyle = bgGrad;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            drawPipes();
+            drawBird();
+
+            // Dynamic Score & Message Banner
+            ctx.fillStyle = '#c9184a';
+            ctx.font = 'bold 16px Poppins';
+            ctx.fillText(`Skor: ${score}`, 15, 28);
+            ctx.font = 'bold 13px Poppins';
+            ctx.fillText(`Rekor: ${highScore}`, 15, 48);
+
+            // Live Message
+            if (gameState === 'PLAYING') {
+                ctx.fillStyle = '#d90429';
+                ctx.font = 'bold 13px Poppins';
+                ctx.textAlign = 'center';
+                ctx.fillText(currentQuote, canvas.width / 2, 28);
+                ctx.textAlign = 'left';
+            }
+
+            if (gameState === 'START') {
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+                ctx.fillRect(20, 120, canvas.width - 40, 140);
+
+                ctx.fillStyle = '#e63946';
+                ctx.font = 'bold 18px Poppins';
+                ctx.textAlign = 'center';
+                ctx.fillText('Oyuna Başlamak İçin', canvas.width / 2, 168);
+                ctx.fillText('Ekrana Dokun! 💕', canvas.width / 2, 200);
+                ctx.textAlign = 'left';
+            }
+
+            if (gameState === 'GAMEOVER') {
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.92)';
+                ctx.fillRect(20, 100, canvas.width - 40, 180);
+
+                ctx.fillStyle = '#e63946';
+                ctx.font = 'bold 18px Dancing Script';
+                ctx.textAlign = 'center';
+                ctx.fillText('Zeynep Seni Çok Seviyor!', canvas.width / 2, 140);
+                
+                ctx.fillStyle = '#444';
+                ctx.font = '14px Poppins';
+                ctx.fillText(`Toplanan Sevgi Skoru: ${score}`, canvas.width / 2, 175);
+                
+                ctx.fillStyle = '#ff4d6d';
+                ctx.font = 'bold 14px Poppins';
+                ctx.fillText('Tekrar Oynamak İçin Dokun 🔄', canvas.width / 2, 220);
+                ctx.textAlign = 'left';
+            }
+        }
+
+        function gameLoop() {
+            if (gameState === 'PLAYING') {
+                bird.velocity += bird.gravity;
+                bird.y += bird.velocity;
+
+                if (bird.y + bird.radius >= canvas.height || bird.y - bird.radius <= 0) {
+                    gameState = 'GAMEOVER';
+                }
+
+                updatePipes();
+                frameCount++;
+            }
+
+            draw();
+
+            if (gameState === 'PLAYING') {
+                animationFrameId = requestAnimationFrame(gameLoop);
+            }
+        }
+
+        draw();
+    </script>
+</body>
+</html>
